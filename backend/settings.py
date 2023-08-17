@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'users',
     'post',
     
+    'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
 ]
@@ -43,6 +44,7 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -171,3 +173,5 @@ MEDIA_ROOT = 'static/images/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "users.UserAccount"
+
+CORS_ALLOW_ALL_ORIGINS = True
