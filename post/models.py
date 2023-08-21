@@ -13,6 +13,8 @@ class posts(models.Model):
     created_at  = models.DateTimeField(auto_now_add=True)
     updated_at  = models.DateTimeField(auto_now=True)
     is_deleted  = models.BooleanField(default=False)
+    is_blocked = models.BooleanField(default=False)
+    reported_users = models.ManyToManyField(UserAccount, related_name='reported_posts', blank=True)
     
     def __str__(self):
         return self.author.username

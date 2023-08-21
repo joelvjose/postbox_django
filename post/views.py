@@ -57,4 +57,36 @@ class UpdatePostView(APIView):
                 return Response(serializer.errors)
         except posts.DoesNotExist:
             return Response("No such post found.!")
-            
+        
+class ReportPostView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self,request,pk):
+        try:
+            post = posts.objects.get(pk=pk)
+            if request.user in post.reported_by_users.all():
+                return Response("You have already reported this post.", status=status.HTTP_400_BAD_REQUEST)
+            post.reported_users.add(request.user)                  
+            return Response("Post Reported", status=status.HTTP_200_OK)
+        except posts.DoesNotExist:
+            return Response("Post not found", status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class LikeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request, pk):
+        try:
+            post = posts.objects.get(pk=pk)
+            if request.user in post.likes.all():
+                post.likes.remove(request.user)
+                return Response("Post unliked.!", status=status.HTTP_200_OK)
+            else:
+                post.likes.add(request.user)
+                return Response("Post liked.!", status=status.HTTP_200_OK)
+        except posts.DoesNotExist:
+            return Response("Post not found", status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
