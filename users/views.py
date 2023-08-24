@@ -60,7 +60,7 @@ class RetrieveUserView(APIView):
     
     
 class UsersList(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdminUser]
     
     def get(self,request):
         try:
@@ -71,7 +71,7 @@ class UsersList(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         
 class BlockUser(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdminUser]
     
     def get(self,request,id):
         try:
