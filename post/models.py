@@ -24,3 +24,6 @@ class posts(models.Model):
     
     def created_time(self):
         return timesince(self.created_at)
+    
+    def total_reports(self):
+        return self.reported_users.count()

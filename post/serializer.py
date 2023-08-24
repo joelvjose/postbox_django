@@ -6,11 +6,8 @@ from .models import posts
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserAccount
-        fields = '__all__'
-        # fields = ['username','email','password']
-        extra_kwargs={
-            'password':{'write_only':True}
-        }
+        fields = ['id','username','first_name','last_name','email','display_pic',
+                  'last_login','is_admin','is_staff','is_active','is_superuser']
 
 class  PostSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only = True)

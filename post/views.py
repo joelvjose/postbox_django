@@ -2,8 +2,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import permissions,status,generics
 
-from .serializer import PostSerializer
+from .serializer import PostSerializer,UserSerializer
 from .models import posts
+from users.models import UserAccount
 
 class PostListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -90,3 +91,23 @@ class LikeView(APIView):
             return Response("Post not found", status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+class ProfileView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, email, *args, **kwargs):
+        try:
+            profile = UserAccount.objects.get(email=email)
+            profile_posts = posts.objects.filter(author=profile, is_deleted=False).order_by('-updated_at')
+            profile_serializer = UserSerializer(profile)
+            post_serializer = PostSerializer(profile_posts, many=True)
+
+            context = {
+                'profile_user': profile_serializer.data,
+                'profile_posts': post_serializer.data
+            }
+            return Response(context, status=status.HTTP_200_OK)
+
+        except UserAccount.DoesNotExist:
+            return Response("User not found", status=status.HTTP_404_NOT_FOUND)

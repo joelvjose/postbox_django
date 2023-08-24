@@ -9,6 +9,9 @@ from rest_framework import permissions,status
 
 from .serializer import UserSerializer,UserCreateSerializer
 
+from .models import UserAccount
+
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -54,4 +57,33 @@ class RetrieveUserView(APIView):
         user = request.user
         user = UserSerializer(user)
         return Response(user.data, status=status.HTTP_200_OK)
+    
+    
+class UsersList(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self,request):
+        try:
+            user = UserAccount.objects.filter(is_admin = False)
+            serializer = UserSerializer(user, many = True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+class BlockUser(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self,request,id):
+        try:
+            user=UserAccount.objects.get(id=id)
+            if user.is_active:
+                user.is_active=False
+            else:
+                user.is_active=True
+            user.save()
+            return Response(status=status.HTTP_200_OK)
+                
+        except UserAccount.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
         
