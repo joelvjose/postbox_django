@@ -22,10 +22,10 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['email'] = user.email
         # ...
         usr = UserSerializer(user)
-        if usr.data.is_active:
+        if usr.data['is_active']:
             return token
         else:
-            return Response('User is Blocked by Admin',status=status.HTTP_404_NOT_FOUND)
+            return Response('You are Blocked by Admin',status=status.HTTP_404_NOT_FOUND)
     
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
