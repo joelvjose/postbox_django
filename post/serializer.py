@@ -7,7 +7,7 @@ class UserSerializer(serializers.ModelSerializer):
     total_posts = serializers.SerializerMethodField()
     
     def get_total_posts(self, obj):
-        return obj.posts_set.filter(is_deleted=False).count()
+        return obj.posts.filter(is_deleted=False).count() #posts is the related name of user in post model
 
     class Meta:
         model = UserAccount
