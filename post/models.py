@@ -27,3 +27,19 @@ class posts(models.Model):
     
     def total_reports(self):
         return self.reported_users.count()
+    
+class Comment(models.Model):
+    post = models.ForeignKey(posts,related_name='comments',on_delete=models.CASCADE)
+    user = models.ForeignKey(UserAccount,on_delete=models.CASCADE)
+    body = models.TextField()
+    creted_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return '%s - %s' % (self.body, self.user.first_name)
+    
+class Follow(models.Model):
+    followers = models.ForeignKey(UserAccount, related_name='followers', on_delete=models.CASCADE)
+    following = models.ForeignKey(UserAccount, related_name='following', on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f'{self.followers} -> {self.following}'
