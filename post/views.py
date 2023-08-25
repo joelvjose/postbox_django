@@ -2,15 +2,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import permissions,status,generics
 
-from .serializer import PostSerializer,UserSerializer
-from .models import posts
+from .serializer import PostSerializer,UserSerializer,CommentSerializer
+from .models import posts,Comment
 from users.models import UserAccount
 
 class PostListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = posts.objects.all().exclude(is_deleted = True).order_by('-created_at')
     serializer_class = PostSerializer
-    
+
+# ============================================== POST SECTION =============================================
+   
 class CreatePostView(APIView):
     permission_classes  = [permissions.IsAuthenticated]
     serializer_class    = PostSerializer
@@ -31,7 +33,6 @@ class CreatePostView(APIView):
         
 class DeletePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = PostSerializer
     
     def delete(self,request,pk):
         try:
@@ -74,6 +75,7 @@ class ReportPostView(APIView):
         except Exception as e:
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# ============================================== POST LIKE SECTION =============================================
 
 class LikeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -92,7 +94,38 @@ class LikeView(APIView):
         except Exception as e:
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-        
+# ============================================== POST COMMENT SECTION =============================================
+
+class CreateComment(APIView):
+    permission_classes = [permissions.IsAuthenticated] 
+    serializer_Class = CommentSerializer
+    
+    def post(self, request, pk, *args, **kwargs):
+        try:
+            user = request.user
+            body = request.data['body']
+            serializer = self.serializer_class(data=request.data)
+            if serializer.is_valid():
+                serializer.save(author=user, post_id=pk , body=body)
+                return Response(status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors,status=status.HTTP_406_NOT_ACCEPTABLE)
+        except Exception as e:
+            return Response(status=status.HTTP_503_SERVICE_UNAVAILABLE)  
+      
+class DeleteComment(APIView):
+    permission_classes = [permissions.IsAuthenticated]  
+    
+    def delete(self,request,pk):
+        try:
+            comment = Comment.objects.get(id=pk,user=request.user)
+            comment.delete()
+            return Response(status=status.HTTP_200_OK)
+        except Comment.DoesNotExist:
+            return Response("No such post found.!",status=status.HTTP_404_NOT_FOUND)      
+
+# =============================================== USER PROFILE ================================================   
+      
 class ProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 

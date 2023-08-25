@@ -8,22 +8,24 @@ from rest_framework.views import APIView
 from rest_framework import permissions,status
 
 from .serializer import UserSerializer,UserCreateSerializer
-
 from .models import UserAccount
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
+        
         token = super().get_token(user)
-
         # Add custom claims
         token['username'] = user.username
         token['is_superuser'] = user.is_superuser
         token['email'] = user.email
         # ...
-
-        return token
+        usr = UserSerializer(user)
+        if usr.data.is_active:
+            return token
+        else:
+            return Response('User is Blocked by Admin',status=status.HTTP_404_NOT_FOUND)
     
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer

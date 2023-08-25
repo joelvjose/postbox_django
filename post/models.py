@@ -32,7 +32,7 @@ class Comment(models.Model):
     post = models.ForeignKey(posts,related_name='comments',on_delete=models.CASCADE)
     user = models.ForeignKey(UserAccount,on_delete=models.CASCADE)
     body = models.TextField()
-    creted_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return '%s - %s' % (self.body, self.user.first_name)
