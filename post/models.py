@@ -37,6 +37,9 @@ class Comment(models.Model):
     def __str__(self):
         return '%s - %s' % (self.body, self.user.first_name)
     
+    def created_time(self):
+        return timesince(self.created_at)
+    
 class Follow(models.Model):
     followers = models.ForeignKey(UserAccount, related_name='followers', on_delete=models.CASCADE)
     following = models.ForeignKey(UserAccount, related_name='following', on_delete=models.CASCADE)

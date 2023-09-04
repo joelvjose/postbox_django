@@ -74,7 +74,19 @@ class ReportPostView(APIView):
             return Response("Post not found", status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+# ============================================== FETCH POST DETAILS ============================================
 
+class PostDetail(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request, pk):
+        try:
+            post = posts.objects.get(id=pk)
+            serializer = PostSerializer(post)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
 # ============================================== POST LIKE SECTION =============================================
 
 class LikeView(APIView):
@@ -98,7 +110,7 @@ class LikeView(APIView):
 
 class CreateComment(APIView):
     permission_classes = [permissions.IsAuthenticated] 
-    serializer_Class = CommentSerializer
+    serializer_class = CommentSerializer
     
     def post(self, request, pk, *args, **kwargs):
         try:
@@ -106,11 +118,12 @@ class CreateComment(APIView):
             body = request.data['body']
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
-                serializer.save(author=user, post_id=pk , body=body)
+                serializer.save(user=user, post_id=pk , body=body)
                 return Response(status=status.HTTP_201_CREATED)
             else:
                 return Response(serializer.errors,status=status.HTTP_406_NOT_ACCEPTABLE)
         except Exception as e:
+            print(e)
             return Response(status=status.HTTP_503_SERVICE_UNAVAILABLE)  
       
 class DeleteComment(APIView):
@@ -122,7 +135,7 @@ class DeleteComment(APIView):
             comment.delete()
             return Response(status=status.HTTP_200_OK)
         except Comment.DoesNotExist:
-            return Response("No such post found.!",status=status.HTTP_404_NOT_FOUND)      
+            return Response("No such comment found.!",status=status.HTTP_404_NOT_FOUND)      
 
 # =============================================== USER PROFILE ================================================   
       
