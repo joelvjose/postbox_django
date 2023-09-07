@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework import permissions,status,generics
 
 from .serializer import PostSerializer,UserSerializer,CommentSerializer
-from .models import posts,Comment
+from .models import posts,Comment,Follow
 from users.models import UserAccount
 
 class PostListView(generics.ListAPIView):
@@ -157,3 +157,26 @@ class ProfileView(APIView):
 
         except UserAccount.DoesNotExist:
             return Response("User not found", status=status.HTTP_404_NOT_FOUND)
+        
+# ============================================== FOLLOW USER ==================================================
+
+class FollowUserView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request, pk):
+        try:
+            user=request.user
+            follows = UserAccount.objects.get(id=pk)
+            is_following = Follow.objects.filter(follower=user,following=follows)
+            print(is_following)
+            if is_following:
+                is_following.delete()
+                return Response('Unfollowed Successfully',status=status.HTTP_200_OK)
+            else:
+                new_follow = Follow(follower=user, following=follows)
+                new_follow.save()
+                return Response('Followed Successfully', status=status.HTTP_200_OK)
+        except UserAccount.DoesNotExist:
+            return Response('User not found',status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response(str(e),status=status.HTTP_500_INTERNAL_SERVER_ERROR)

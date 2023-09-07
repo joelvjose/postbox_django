@@ -35,14 +35,14 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return '%s - %s' % (self.body, self.user.first_name)
+        return '%s - %s - %s' % (self.post.id,self.body, self.user.first_name)
     
     def created_time(self):
         return timesince(self.created_at)
     
 class Follow(models.Model):
-    followers = models.ForeignKey(UserAccount, related_name='followers', on_delete=models.CASCADE)
+    follower = models.ForeignKey(UserAccount, related_name='followers', on_delete=models.CASCADE)
     following = models.ForeignKey(UserAccount, related_name='following', on_delete=models.CASCADE)
     
     def __str__(self):
-        return f'{self.followers} -> {self.following}'
+        return f'{self.follower} -> {self.following}'

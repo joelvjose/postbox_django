@@ -59,6 +59,7 @@ class RetrieveUserView(APIView):
         user = request.user
         user = UserSerializer(user)
         return Response(user.data, status=status.HTTP_200_OK)
+        
     
     
 class UsersList(APIView):
@@ -87,5 +88,6 @@ class BlockUser(APIView):
                 
         except UserAccount.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
