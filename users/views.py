@@ -59,7 +59,22 @@ class RetrieveUserView(APIView):
         user = request.user
         user = UserSerializer(user)
         return Response(user.data, status=status.HTTP_200_OK)
-        
+
+class UpdateUserView(APIView):
+    permission_classes=[permissions.IsAuthenticated]
+    serializer_class = UserSerializer
+    
+    def post(self,request):
+        try:
+            user = request.user
+            obj = UserAccount.objects.get(id=user.id)
+            serializer = self.serializer_class(instance=obj,data=request.data, partial= True) 
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.errors,status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except UserAccount.DoesNotExist:
+            return Response("User not found in the database.", status=status.HTTP_404_NOT_FOUND)
     
     
 class UsersList(APIView):

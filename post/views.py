@@ -11,6 +11,27 @@ class PostListView(generics.ListAPIView):
     queryset = posts.objects.all().exclude(is_deleted = True).order_by('-created_at')
     serializer_class = PostSerializer
 
+class PostHomeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = PostSerializer
+    
+    def get(self, request):
+        try:
+            user = request.user
+            followers = Follow.objects.filter(follower=user)
+            posts_list=[]
+            post_by_follower = posts.objects.none()
+            if followers:
+                for fuser in followers:
+                    post_by_follower = posts.objects.filter(author=fuser.following).exclude(is_deleted = True).order_by('-created_at')
+                    posts_list.append(post_by_follower)
+            post_by_user = posts.objects.filter(author=user).exclude(is_deleted = True).order_by('-created_at')
+            print(post_by_follower)
+            posts_list = post_by_follower | post_by_user   
+            serializer = PostSerializer(posts_list,many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 # ============================================== POST SECTION =============================================
    
 class CreatePostView(APIView):
@@ -123,7 +144,6 @@ class CreateComment(APIView):
             else:
                 return Response(serializer.errors,status=status.HTTP_406_NOT_ACCEPTABLE)
         except Exception as e:
-            print(e)
             return Response(status=status.HTTP_503_SERVICE_UNAVAILABLE)  
       
 class DeleteComment(APIView):
@@ -142,7 +162,7 @@ class DeleteComment(APIView):
 class ProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, email, *args, **kwargs):
+    def get(self, request, email, *args, **kwargs):
         try:
             profile = UserAccount.objects.get(email=email)
             profile_posts = posts.objects.filter(author=profile, is_deleted=False).order_by('-updated_at')
@@ -168,7 +188,6 @@ class FollowUserView(APIView):
             user=request.user
             follows = UserAccount.objects.get(id=pk)
             is_following = Follow.objects.filter(follower=user,following=follows)
-            print(is_following)
             if is_following:
                 is_following.delete()
                 return Response('Unfollowed Successfully',status=status.HTTP_200_OK)
