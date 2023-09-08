@@ -26,7 +26,6 @@ class PostHomeView(APIView):
                     post_by_follower = posts.objects.filter(author=fuser.following).exclude(is_deleted = True).order_by('-created_at')
                     posts_list.append(post_by_follower)
             post_by_user = posts.objects.filter(author=user).exclude(is_deleted = True).order_by('-created_at')
-            print(post_by_follower)
             posts_list = post_by_follower | post_by_user   
             serializer = PostSerializer(posts_list,many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -86,9 +85,9 @@ class ReportPostView(APIView):
     
     def post(self,request,pk):
         try:
-            post = posts.objects.get(pk=pk)
-            if request.user in post.reported_by_users.all():
-                return Response("You have already reported this post.", status=status.HTTP_400_BAD_REQUEST)
+            post = posts.objects.get(id=pk)
+            if request.user in post.reported_users.all():
+                return Response("You have already reported this post.", status=status.HTTP_200_OK)
             post.reported_users.add(request.user)                  
             return Response("Post Reported", status=status.HTTP_200_OK)
         except posts.DoesNotExist:

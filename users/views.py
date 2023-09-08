@@ -5,10 +5,12 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import api_view
 
 from rest_framework.views import APIView
-from rest_framework import permissions,status
+from rest_framework import permissions,status,generics
 
 from .serializer import UserSerializer,UserCreateSerializer
+from post.serializer import PostSerializer
 from .models import UserAccount
+from post.models import posts as Post
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -60,6 +62,8 @@ class RetrieveUserView(APIView):
         user = UserSerializer(user)
         return Response(user.data, status=status.HTTP_200_OK)
 
+#=================================================== UPDATE USER DETAILS =====================================
+ 
 class UpdateUserView(APIView):
     permission_classes=[permissions.IsAuthenticated]
     serializer_class = UserSerializer
@@ -76,7 +80,7 @@ class UpdateUserView(APIView):
         except UserAccount.DoesNotExist:
             return Response("User not found in the database.", status=status.HTTP_404_NOT_FOUND)
     
-    
+# ==================================================== ADMIN SIDE FUNCTIONS=============================================
 class UsersList(APIView):
     permission_classes = [permissions.IsAdminUser]
     
@@ -106,3 +110,42 @@ class BlockUser(APIView):
         except Exception as e:
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+class PostsList(APIView):
+    permission_classes = [permissions.IsAdminUser]
+    
+    def get(self,request):
+        try:
+            posts = Post.objects.all()
+            serializer = PostSerializer(posts, many = True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+class BlockPost(APIView):
+    permission_classes = [permissions.IsAdminUser]
+    
+    def get(self,request,id):
+        try:
+            post=Post.objects.get(id=id)
+            if post.is_blocked:
+                post.is_blocked=False
+            else:
+                post.is_blocked=True
+            post.save()
+            return Response(status=status.HTTP_200_OK)
+                
+        except Post.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class BlockedPostsList(generics.ListAPIView):
+    permission_classes = [permissions.IsAdminUser]
+    queryset = Post.objects.filter(is_blocked=True).order_by('-created_at')
+    serializer_class = PostSerializer
+
+
+class ReportedPostsList(generics.ListAPIView):
+    permission_classes = [permissions.IsAdminUser]
+    queryset = Post.objects.filter(is_blocked=False, reported_users__isnull=False).order_by('-created_at')
+    serializer_class = PostSerializer
