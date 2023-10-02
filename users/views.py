@@ -10,7 +10,7 @@ from rest_framework import permissions,status,generics
 from .serializer import UserSerializer,UserCreateSerializer
 from post.serializer import PostSerializer
 from .models import UserAccount
-from post.models import posts as Post
+from post.models import posts as Post,Notification
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -126,11 +126,24 @@ class BlockPost(APIView):
     
     def get(self,request,id):
         try:
+            user = request.user
             post=Post.objects.get(id=id)
             if post.is_blocked:
                 post.is_blocked=False
+                Notification.objects.create(
+                        from_user=user,
+                        to_user=post.author,
+                        post=post,
+                        notification_type=Notification.NOTIFICATION_TYPES[5][0],
+                    )
             else:
                 post.is_blocked=True
+                Notification.objects.create(
+                        from_user=user,
+                        to_user=post.author,
+                        post=post,
+                        notification_type=Notification.NOTIFICATION_TYPES[4][0],
+                    )
             post.save()
             return Response(status=status.HTTP_200_OK)
                 

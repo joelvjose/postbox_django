@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from users.models import UserAccount
-from .models import posts,Comment,Follow
+from .models import posts,Comment,Follow,Notification
 
 class UserSerializer(serializers.ModelSerializer):
     follower_count = serializers.SerializerMethodField()
@@ -73,3 +73,17 @@ class  PostSerializer(serializers.ModelSerializer):
         model = posts
         fields = ['id','body','img','author','created_time','likes', 'likes_count','reports_count',
                   'comments','is_deleted','is_blocked','followers']
+        
+class NotificationSerializer(serializers.ModelSerializer):
+    from_user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = '__all__'
+        read_only_fields = ('notification_type',)
+
+    def validate_notification_type(self, value):
+        choices = dict(Notification.NOTIFICATION_TYPES)
+        if value not in choices:
+            raise serializers.ValidationError("Invalid notification type.")
+        return value
