@@ -8,7 +8,6 @@ from .models import posts,Comment,Follow,Notification
 from users.models import UserAccount
 
 class PostListView(generics.ListAPIView):
-    print("hihihih")
     permission_classes = [permissions.IsAuthenticated]
     queryset = posts.objects.all().exclude(is_deleted = True).order_by('-created_at')
     serializer_class = PostSerializer
