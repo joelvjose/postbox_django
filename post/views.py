@@ -21,13 +21,18 @@ class PostHomeView(APIView):
             user = request.user
             followers = Follow.objects.filter(follower=user)
             posts_list=[]
+            print(followers)
             post_by_follower = posts.objects.none()
             if followers:
-                for fuser in followers:
-                    post_by_follower = posts.objects.filter(author=fuser.following).exclude(is_deleted = True).order_by('-created_at')
-                    posts_list.append(post_by_follower)
-            post_by_user = posts.objects.filter(author=user).exclude(is_deleted = True).order_by('-created_at')
+                # for fuser in followers:
+                #     post_by_follower = posts.objects.filter(author=fuser.following).exclude(is_deleted = True).order_by('-created_at')
+                #     posts_list.append(post_by_follower)
+                following_authors = [fuser.following for fuser in followers]
+                post_by_follower = posts.objects.filter(author__in=following_authors).exclude(is_deleted=True).order_by('-created_at')
+            print(posts_list)
+            post_by_user = posts.objects.filter(author=user).exclude(is_deleted = True).order_by('-created_at') 
             posts_list = post_by_follower | post_by_user   
+            print(posts_list)
             serializer = PostSerializer(posts_list,many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except:
