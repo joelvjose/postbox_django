@@ -19,7 +19,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['54.210.224.99','postbox.joeje.shop']
+ALLOWED_HOSTS = ['18.232.111.30','postbox.joeje.shop']
 
 
 # Application definition
