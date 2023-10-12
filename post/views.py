@@ -9,7 +9,7 @@ from users.models import UserAccount
 
 class PostListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    queryset = posts.objects.all().exclude(is_deleted = True).order_by('-created_at')
+    queryset = posts.objects.all().exclude(is_deleted = True, is_blocked=True).order_by('-created_at')
     serializer_class = PostSerializer
 
 class PostHomeView(APIView):
@@ -21,18 +21,15 @@ class PostHomeView(APIView):
             user = request.user
             followers = Follow.objects.filter(follower=user)
             posts_list=[]
-            print(followers)
             post_by_follower = posts.objects.none()
             if followers:
                 # for fuser in followers:
                 #     post_by_follower = posts.objects.filter(author=fuser.following).exclude(is_deleted = True).order_by('-created_at')
                 #     posts_list.append(post_by_follower)
                 following_authors = [fuser.following for fuser in followers]
-                post_by_follower = posts.objects.filter(author__in=following_authors).exclude(is_deleted=True).order_by('-created_at')
-            print(posts_list)
-            post_by_user = posts.objects.filter(author=user).exclude(is_deleted = True).order_by('-created_at') 
+                post_by_follower = posts.objects.filter(author__in=following_authors).exclude(is_deleted=True, is_blocked=True).order_by('-created_at')
+            post_by_user = posts.objects.filter(author=user).exclude(is_deleted = True, is_blocked=True).order_by('-created_at') 
             posts_list = post_by_follower | post_by_user   
-            print(posts_list)
             serializer = PostSerializer(posts_list,many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except:
@@ -288,7 +285,6 @@ class SearchView(APIView):
     
     def post(self,request):
         key = request.data['key']
-        print(key)
         queryset = UserAccount.objects.filter(Q(username__icontains = key)|Q(first_name__icontains = key)|Q(email__icontains = key),is_admin=False)
         serializer = UserSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

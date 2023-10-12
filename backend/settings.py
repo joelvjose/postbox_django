@@ -20,6 +20,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = False
 
 ALLOWED_HOSTS = ['54.210.224.99','postbox.joeje.shop']
+# ALLOWED_HOSTS = ['*']
 
 
 # Application definition
