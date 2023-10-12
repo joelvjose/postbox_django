@@ -86,7 +86,7 @@ class UsersList(APIView):
     
     def get(self,request):
         try:
-            user = UserAccount.objects.filter(is_admin = False)
+            user = UserAccount.objects.filter(is_admin = False).order_by('-date_joined')
             serializer = UserSerializer(user, many = True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except:
@@ -115,7 +115,7 @@ class PostsList(APIView):
     
     def get(self,request):
         try:
-            posts = Post.objects.all()
+            posts = Post.objects.all().order_by('-created_at')
             serializer = PostSerializer(posts, many = True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except:

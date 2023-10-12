@@ -9,7 +9,7 @@ from users.models import UserAccount
 
 class PostListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    queryset = posts.objects.all().exclude(is_deleted = True, is_blocked=True).order_by('-created_at')
+    queryset = posts.objects.filter(is_deleted = False, is_blocked=False, author__is_active=True).order_by('-created_at')
     serializer_class = PostSerializer
 
 class PostHomeView(APIView):
@@ -23,12 +23,9 @@ class PostHomeView(APIView):
             posts_list=[]
             post_by_follower = posts.objects.none()
             if followers:
-                # for fuser in followers:
-                #     post_by_follower = posts.objects.filter(author=fuser.following).exclude(is_deleted = True).order_by('-created_at')
-                #     posts_list.append(post_by_follower)
                 following_authors = [fuser.following for fuser in followers]
-                post_by_follower = posts.objects.filter(author__in=following_authors).exclude(is_deleted=True, is_blocked=True).order_by('-created_at')
-            post_by_user = posts.objects.filter(author=user).exclude(is_deleted = True, is_blocked=True).order_by('-created_at') 
+                post_by_follower = posts.objects.filter(author__in=following_authors, is_deleted = False, is_blocked=False).order_by('-created_at')
+            post_by_user = posts.objects.filter(author=user,is_deleted = False, is_blocked=False).order_by('-created_at') 
             posts_list = post_by_follower | post_by_user   
             serializer = PostSerializer(posts_list,many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
