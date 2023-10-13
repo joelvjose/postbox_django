@@ -44,7 +44,9 @@ class CreatePostView(APIView):
             body = request.data['body']
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
+                print("first")
                 post = serializer.save(author=user, img=img, body=body)
+                print("second")
                 for follower in user.followers.all():
                     Notification.objects.create(
                         from_user=user,
