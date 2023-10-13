@@ -42,7 +42,9 @@ class CreatePostView(APIView):
             user = request.user
             img = request.data['img']
             body = request.data['body']
+            print("hello")
             serializer = self.serializer_class(data=request.data)
+            print("hai")
             if serializer.is_valid():
                 print("first")
                 post = serializer.save(author=user, img=img, body=body)
